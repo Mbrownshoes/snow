@@ -332,11 +332,21 @@ $(".stuff li > a").click( function() {
                 .selectAll("circle")
                 .data(topojson.feature(pillows, pillows.objects.pillows).features)
                 .enter()
-                .append("circle")
+                // .append("circle")
+                .append("image")
+                .attr('xlink:href','Snowflake.svg')
                 .attr("transform", function(d) {
                     return "translate(" + path.centroid(d) + ")";
                 })
+                .attr("width", 7)
+                .attr("height", 7)
+                .attr('x', '-1')
+                .attr('y', '-1')
+                // .attr("transform", function(d) {
+                //     return "translate(" + path.centroid(d) + ")";
+                // })
                 .attr("r", 20)
+
                 .on("mouseover", function(d) {
                         console.log(d)
                         // tooltip.text(d.SCHOOL_NAME);
