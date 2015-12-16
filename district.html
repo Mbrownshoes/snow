@@ -194,10 +194,11 @@ var data = {
 //http://cat.data.gov.bc.ca/dataset/bc-schools-examinations-results
 
 $.ajax({
-    url: 'http://cat.data.gov.bc.ca/api/action/datastore_search',
+    url: 'https://cat.data.gov.bc.ca/api/action/datastore_search',
     data: data,
     dataType: 'jsonp',
     success: function(data) {
+        console.log(data)
         data = data.result.records
         data.forEach(function(d) {
             test = d
