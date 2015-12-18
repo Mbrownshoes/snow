@@ -164,11 +164,11 @@
 <h2 id="distid"> </h2>
 <div class="btn-group" id="grades" role="group" aria-label="...">
 <!--     <div class="container"> -->
-    <h4>Grades</h4>
-    <button type="button"  class="btn btn-info" value="Avg Class Size K" >K</button>
-    <button type="button" class=" active btn btn-info" value="Avg Class Size 1 3" >1 - 3</button>
-    <button type="button" class="btn btn-info" value="Avg Class Size 4 7" >4 - 7</button>
-    <button type="button" class="btn btn-info" value="Avg Class Size 8 12" >8 - 12</button>
+    <h4>Climate Variable</h4>
+    <button type="button"  class="btn btn-info" value="Avg Class Size K" >Snow Depth</button>
+    <button type="button" class=" active btn btn-info" value="Avg Class Size 1 3" >Air Temp.</button>
+    <button type="button" class="btn btn-info" value="Avg Class Size 4 7" >Snow Water equiv.</button>
+    <button type="button" class="btn btn-info" value="Avg Class Size 8 12" >Cumm. Precip.</button>
 <!--     </div> -->
 </div>
 
@@ -474,7 +474,7 @@ $(".stuff li > a").click( function() {
                             console.log(counter)
                         }else{
                             console.log('this is the grade: '+ grade)
-                            updatechart(d,grade);
+                            updatechart(d);
                         }                        
                     });
 
@@ -523,10 +523,10 @@ $(".stuff li > a").click( function() {
     var widthG = 760 /2 - margin.left - margin.right,
         heightG = 250 - margin.top - margin.bottom;
 
-    var parseDate = d3.time.format("%y %m").parse;
-    var inputFormat = d3.time.format.iso; 
-    var outputFormat = d3.time.format("%Y-%m-%d %X"); 
-outputFormat(inputFormat.parse(t+"-0800"))
+    // var parseDate = d3.time.format("%y %m").parse;
+    var parseDate = d3.time.format.iso.parse; 
+    // var outputFormat = d3.time.format("%Y-%m-%d %X"); 
+    // outputFormat(inputFormat.parse(t+"-0800"))
     var chartData = [];
 
     var x = d3.time.scale()
@@ -546,7 +546,7 @@ outputFormat(inputFormat.parse(t+"-0800"))
 
     var line = d3.svg.line()
         .x(function(d) {
-            // console.log(d.date)
+            console.log(d.date)
             return x(d.date);
         })
         .y(function(d) {
@@ -568,7 +568,8 @@ outputFormat(inputFormat.parse(t+"-0800"))
         "use strict";
         var data = {
             resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-            limit: 48, // get 2 days of data
+            limit: 96, // get 2 days of data
+            offset: 1600
             // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
         };
 
@@ -576,60 +577,26 @@ outputFormat(inputFormat.parse(t+"-0800"))
             url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
             data: data,
             success: function(data) {
-                console.log(data)
-                console.log(d.properties.locID)
-                test = data
+
                 var chartData = []
-                
-                // remove names and just leave ID to match with pillow locations data
-                // for (i=0; i<data.result['fields'].length; i++) {
-                //     if ((data.result['fields'][i]['id'] != "_id") && (data.result['fields'][i]['id'] != "DATE (UTC)")){
-                //         chartData.push({
-                //             full_name:data.result['fields'][i]['id'],
-                //             station:data.result['fields'][i]['id'].slice(0,5)
-                //         })
-                //     }
-                // }
+
 
                 for (i = 0; i < data.result.records.length; i++) {
-
                     // if key = site ID
                     for (key in data.result.records[i]){
                         // console.log(key.slice(0,5))
                         if (key.slice(0,5) == d.properties.locID){
-                            console.log(key.slice(0,5))
-                            console.log(data.result.records[i][key])
                             chartData.push({
-                                date:data.result.records[i]['DATE (UTC)'],
+                                date:parseDate(data.result.records[i]['DATE (UTC)']),
                                 sd:data.result.records[i][key]
                             })
                         }
 
-                        // console.log(data.result.records[1][key])
                     }
 
-
-                    for (key in data.result.records[1]){
-
-                        // console.log(data.result.records[1][key])
-                    }
-
-
-                    // x=data.result.records[i]
-                    // for (key in x){
-                    //     chartData.push({
-                    //         station:key.slice(0,5)
-                    //     })
-                    // }
-
-                    // chartData.push({
-                    //     station: data.result.records[i][d.properties.locID+" "+d.properties.staNam],
-                    //     // sz: Number(data.result.records[i][grade])
-                    // })
-                    // console.log(chartData)
 
                 }
-                console.log(chartData)
+                // console.log(chartData)
 
                 chartData.sort(function(a, b) {
                     return a.date - b.date;
@@ -649,7 +616,7 @@ outputFormat(inputFormat.parse(t+"-0800"))
                         return y(dataSum/chartData.length);
                     });
 
-                y.domain([0,30]);
+                y.domain([0,200]);
 
                 x.domain(d3.extent(chartData, function(d) {
                     return d.date;
@@ -672,7 +639,7 @@ outputFormat(inputFormat.parse(t+"-0800"))
                     .attr("y", -48)
                     .attr("dy", ".71em")
                     .style("text-anchor", "end")
-                    .text("Number of Students");
+                    .text("Snow depth (cm)");
 
                 svg.append("path")
                     .attr("class", "line")
@@ -727,35 +694,40 @@ outputFormat(inputFormat.parse(t+"-0800"))
         updatechart(currentSchool,grade)
     })
 
-    function updatechart(d,grade){
-        console.log(d.SCHOOL_NAME)
-        console.log(grade)
+    function updatechart(d){
+       
         "use strict";
         var data = {
-            resource_id: '68106e98-99f4-49f2-bcfb-d8093d77602d', // 
-            limit: 1000, // get 5 results
-            filters: '{"School Name":' + '"' + d.SCHOOL_NAME + '"' + '}'
+            resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
+            limit: 96, // get 2 days of data
+            offset: 1600
         };
+
 
         $.ajax({
             url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
             data: data,
             success: function(data) {
-                console.log(data)
+                // console.log(data)
                 var chartData = []
 
                 for (i = 0; i < data.result.records.length; i++) {
+                    // if key = site ID
+                    for (key in data.result.records[i]){
+                        if (key.slice(0,5) == d.properties.locID){
+                            chartData.push({
+                                date:parseDate(data.result.records[i]['DATE (UTC)']),
+                                sd:data.result.records[i][key]
+                            })
+                        }
 
-                    chartData.push({
-                        date: parseDate(data.result.records[i]["School Year"].slice(2, 4) + " 06"),
-                        sz: Number(data.result.records[i][grade])
-                    })
+                    }
 
                 }
 
-                chartData.sort(function(a, b) {
-                    return a.date - b.date;
-                });
+                // chartData.sort(function(a, b) {
+                //     return a.date - b.date;
+                // });
 
                 // y.domain(d3.extent(chartData, function(d) {
                 //     return d.sd;
