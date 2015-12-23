@@ -261,9 +261,12 @@ $(".stuff li > a").click( function() {
                         stations.push(
                             data.result.fields[i]['id'].slice(0,5)
                         )
+
             }
         }
     })
+
+
 
     //
 
@@ -287,7 +290,7 @@ $(".stuff li > a").click( function() {
     var currentSchool,grade,currentDist;
 
     function clicked(d) {
-        console.log(d)
+        // console.log(d)
 
         d3.select("#distid").style("visibility","visible")
         .transition()
@@ -295,14 +298,14 @@ $(".stuff li > a").click( function() {
             .text(d.properties.basin+ " Snow Basin");
             // $("#distid").text(d.properties.basin );
 
-         var disttext = svg.append("text")
-                    .transition()
-                    .delay(200)
-                    .attr("x", (width / 4))             
-                    .attr("y", 0 - (margin.top / 2))
-                    .attr("text-anchor", "middle")  
-                    .style("font-size", "16px") 
-                    .text(d.properties.basin);
+         // var disttext = svg.append("text")
+         //            .transition()
+         //            .delay(200)
+         //            .attr("x", (width / 4))             
+         //            .attr("y", 0 - (margin.top / 2))
+         //            .attr("text-anchor", "middle")  
+         //            .style("font-size", "16px") 
+         //            .text(d.properties.basin);
 
         currentDist = d;
 
@@ -357,7 +360,6 @@ $(".stuff li > a").click( function() {
                 }
 
             })
-            console.log(newpills)
 
             g.append("g")
                 .attr("class", "bubble")
@@ -471,7 +473,7 @@ $(".stuff li > a").click( function() {
             return y(d.sd);
         });
 
-    var meanLine;
+    var meanLine, AvgLine;
     
     svg = d3.select("#chart").append("svg")
         .attr("width", widthG + 100 + margin.left + margin.right)
@@ -480,9 +482,9 @@ $(".stuff li > a").click( function() {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     function makeChart(d) {
-
-        // console.log(d.locID)
+        // console.log('stuff')
         "use strict";
+
         var data = {
             resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
             limit: 96, // get 2 days of data
@@ -490,29 +492,36 @@ $(".stuff li > a").click( function() {
             // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
         };
 
+
+
         $.ajax({
             url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
             data: data,
             success: function(data) {
+
+                var siteData = data.result.records;
+
+                plot_data(siteData);
+
+            }
+        })
+
+        function plot_data(data){
                 var chartData = []
-                for (i = 0; i < data.result.records.length; i++) {
+                for (i = 0; i < data.length; i++) {
                     test = data
-                    for (key in data.result.records[i]){
-                        // console.log(key.slice(0,5))
-                        if (key.slice(0,5) == d.properties.locID){
+                    console.log(i)
+                    var k
+                    for (k in data[i]){
+                        if (k.slice(0,5) == d.properties.locID){
                             chartData.push({
-                                date:parseDate(data.result.records[i]['DATE (UTC)']),
-                                sd:data.result.records[i][key]
+                                date:parseDate(data[i]['DATE (UTC)']),
+                                sd:data[i][k]
                             })
                         }
 
                     }
                 }
-                // console.log(chartData)
-
-                chartData.sort(function(a, b) {
-                    return a.date - b.date;
-                });
 
                 var dataSum = d3.sum(chartData, function (d) {
                     // console.log(d.sd)
@@ -533,8 +542,6 @@ $(".stuff li > a").click( function() {
                 x.domain(d3.extent(chartData, function(d) {
                     return d.date;
                 }));
-
-                console.log(chartData)
 
 
 
@@ -577,20 +584,21 @@ $(".stuff li > a").click( function() {
                 //     .style("fill", "rgb(214,39,40)");
 
 
-            }
-        })
 
-        d3.select("#grades").transition()
-            .delay(200).style("visibility","visible")
 
-        var schooltext = svg.append("text")
+        }
+
+        // d3.select("#grades").transition()
+        //     .delay(200).style("visibility","visible")
+
+        var stationtext = svg.append("text")
             .transition()
             .delay(200)
             .attr("x", (width / 4))             
             .attr("y", 0 - (margin.top / 2.5))
             .attr("text-anchor", "middle")  
             .style("font-size", "16px") 
-            .text(d.SCHOOL_NAME);
+            .text(d.properties.staNam);
 
     }
 
@@ -625,11 +633,12 @@ $(".stuff li > a").click( function() {
 
                 for (i = 0; i < data.result.records.length; i++) {
                     // if key = site ID
-                    for (key in data.result.records[i]){
-                        if (key.slice(0,5) == d.properties.locID){
+                    var k
+                    for (k in data.result.records[i]){
+                        if (k.slice(0,5) == d.properties.locID){
                             chartData.push({
                                 date:parseDate(data.result.records[i]['DATE (UTC)']),
-                                sd:data.result.records[i][key]
+                                sd:data.result.records[i][k]
                             })
                         }
 
@@ -637,13 +646,6 @@ $(".stuff li > a").click( function() {
 
                 }
 
-                // chartData.sort(function(a, b) {
-                //     return a.date - b.date;
-                // });
-
-                // y.domain(d3.extent(chartData, function(d) {
-                //     return d.sd;
-                // }));
                 console.log(chartData)
 
                 x.domain(d3.extent(chartData, function(d) {
@@ -696,11 +698,13 @@ $(".stuff li > a").click( function() {
             //     .duration(1000)
             //     .call(yAxis);
             d3.select("text")
+            .transition()
+            .duration(1000)
             .attr("x", (width / 4))             
             .attr("y", 0 - (margin.top / 2.5))
             .attr("text-anchor", "middle")  
             .style("font-size", "16px") 
-            .text(d.SCHOOL_NAME);
+            .text(d.properties.staNam);
         }
       
     })
