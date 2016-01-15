@@ -465,11 +465,11 @@ $(".stuff li > a").click( function() {
 
     var line = d3.svg.line()
         .x(function(d) {
-            console.log(d.date)
+            // console.log(d.date)
             return x(d.date);
         })
         .y(function(d) {
-            console.log(d.sd)
+            // console.log(d.sd)
             return y(d.sd);
         });
 
@@ -487,8 +487,8 @@ $(".stuff li > a").click( function() {
 
         var data = {
             resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-            limit: 96, // get 2 days of data
-            offset: 1600
+            limit: 200, // get 2 days of data
+            offset: 2300
             // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
         };
 
@@ -500,6 +500,7 @@ $(".stuff li > a").click( function() {
             success: function(data) {
 
                 var siteData = data.result.records;
+                console.log(siteData)
 
                 plot_data(siteData);
 
