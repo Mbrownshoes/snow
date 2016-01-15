@@ -511,7 +511,7 @@ $(".stuff li > a").click( function() {
                 var chartData = []
                 for (i = 0; i < data.length; i++) {
                     test = data
-                    console.log(i)
+                    // console.log(i)
                     var k
                     for (k in data[i]){
                         if (k.slice(0,5) == d.properties.locID){
@@ -523,6 +523,10 @@ $(".stuff li > a").click( function() {
 
                     }
                 }
+
+                chartData.sort(function(a, b) {
+                    return a.date - b.date;
+                });
 
                 var dataSum = d3.sum(chartData, function (d) {
                     // console.log(d.sd)
@@ -538,7 +542,7 @@ $(".stuff li > a").click( function() {
                         return y(dataSum/chartData.length);
                     });
 
-                y.domain([0,200]);
+                y.domain([0,300]);
 
                 x.domain(d3.extent(chartData, function(d) {
                     return d.date;
@@ -620,8 +624,8 @@ $(".stuff li > a").click( function() {
         "use strict";
         var data = {
             resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-            limit: 96, // get 2 days of data
-            offset: 1600
+            limit: 200, // get 2 days of data
+            offset: 2300
         };
 
 
@@ -646,11 +650,14 @@ $(".stuff li > a").click( function() {
                     }
 
                 }
+                chartData.sort(function(a, b) {
+                    return a.date - b.date;
+                });
 
                 console.log(chartData)
 
                 x.domain(d3.extent(chartData, function(d) {
-                    // console.log(d.date)
+                    console.log(d.date)
                     return d.date;
                 }));
 
