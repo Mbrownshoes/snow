@@ -194,11 +194,11 @@ $(".stuff li > a").click( function() {
     // currentDist = []
     updateSchoolLevel(currentDist,level);
 });
-d3.selection.prototype.moveToFront = function() {
-  return this.each(function(){
-  this.parentNode.appendChild(this);
-  });
-};
+// d3.selection.prototype.moveToFront = function() {
+//   return this.each(function(){
+//   this.parentNode.appendChild(this);
+//   });
+// };
 
     var width = 900,
         height = 700,
@@ -334,7 +334,7 @@ d3.selection.prototype.moveToFront = function() {
                 .attr("transform", function(d) {
                     return "translate(" + path.centroid(d) + ")";
                 })
-                .attr("r", 20)
+                .attr("r", 10)
 
                 .on("mouseover", function(d) {
                         console.log(d.properties)
