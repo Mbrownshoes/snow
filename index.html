@@ -64,6 +64,7 @@
         fill-opacity: .5;
         stroke: #fff;
         stroke-width: .01px;
+        z-index: 10;
     }
     
     .bubble :hover {
@@ -193,7 +194,11 @@ $(".stuff li > a").click( function() {
     // currentDist = []
     updateSchoolLevel(currentDist,level);
 });
-
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+  this.parentNode.appendChild(this);
+  });
+};
 
     var width = 900,
         height = 700,
@@ -253,6 +258,7 @@ $(".stuff li > a").click( function() {
     };
 
     $.ajax({
+         async: false,
         url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
         data: data,
         success: function(data) {
@@ -261,12 +267,11 @@ $(".stuff li > a").click( function() {
                         stations.push(
                             data.result.fields[i]['id'].slice(0,5)
                         )
-
             }
         }
     })
 
-
+// console.log(stations)
 
     //
 
@@ -288,50 +293,6 @@ $(".stuff li > a").click( function() {
 
     var counter = 0;
     var currentSchool,grade,currentDist;
-
-    function clicked(d) {
-        // console.log(d)
-
-        d3.select("#distid").style("visibility","visible")
-        .transition()
-            .delay(200)
-            .text(d.properties.basin+ " Snow Basin");
-            // $("#distid").text(d.properties.basin );
-
-         // var disttext = svg.append("text")
-         //            .transition()
-         //            .delay(200)
-         //            .attr("x", (width / 4))             
-         //            .attr("y", 0 - (margin.top / 2))
-         //            .attr("text-anchor", "middle")  
-         //            .style("font-size", "16px") 
-         //            .text(d.properties.basin);
-
-        currentDist = d;
-
-        g.selectAll([".bubble"]).remove();
-
-        dist_num = d.properties.zoneNum;
-        dist_name = d.properties.zone;
-
-        if (active.node() === this) return reset();
-        active.classed("active", false);
-        active = d3.select(this).classed("active", true);
-
-
-        var bounds = path.bounds(d),
-            dx = bounds[1][0] - bounds[0][0],
-            dy = bounds[1][1] - bounds[0][1],
-            x = (bounds[0][0] + bounds[1][0]) / 2,
-            y = (bounds[0][1] + bounds[1][1]) / 2,
-            scale = .6 / Math.max(dx / width, dy / height),
-            translate = [width / 2 - scale * x, height / 2 - scale * y];
-
-
-        svg.transition()
-            .duration(750)
-            .call(zoom.translate(translate).scale(scale).event);
-
 
         var tooltip = d3.select(".map")
             .append("div")
@@ -355,12 +316,15 @@ $(".stuff li > a").click( function() {
             var newpills =[]
 
             allPills.forEach(function(d){
+                // console.log(d.properties.locID )
+
                 if ($.inArray(d.properties.locID , stations)>0){
+                    console.log(d)
                     newpills.push(d)
                 }
 
             })
-
+            console.log(newpills)
             g.append("g")
                 .attr("class", "bubble")
                 .selectAll("circle")
@@ -387,17 +351,63 @@ $(".stuff li > a").click( function() {
                         currentSchool = d;
                         // if first time make if second update chart
                         if (counter == 0){
-                            grade = "Avg Class Size 1 3"
                             makeChart(d);
                             counter += 1;
                             console.log(counter)
                         }else{
-                            console.log('this is the grade: '+ grade)
                             updatechart(d,grade);
                         }                        
                     });
 
         })
+
+
+
+    function clicked(d) {
+        // console.log(d)
+
+        d3.select("#distid").style("visibility","visible")
+        .transition()
+            .delay(200)
+            .text(d.properties.basin+ " Snow Basin");
+            // $("#distid").text(d.properties.basin );
+
+         // var disttext = svg.append("text")
+         //            .transition()
+         //            .delay(200)
+         //            .attr("x", (width / 4))             
+         //            .attr("y", 0 - (margin.top / 2))
+         //            .attr("text-anchor", "middle")  
+         //            .style("font-size", "16px") 
+         //            .text(d.properties.basin);
+
+        currentDist = d;
+
+        // g.selectAll([".bubble"]).remove();
+
+        dist_num = d.properties.zoneNum;
+        dist_name = d.properties.zone;
+
+        if (active.node() === this) return reset();
+        active.classed("active", false);
+        active = d3.select(this).classed("active", true);
+
+
+        var bounds = path.bounds(d),
+            dx = bounds[1][0] - bounds[0][0],
+            dy = bounds[1][1] - bounds[0][1],
+            x = (bounds[0][0] + bounds[1][0]) / 2,
+            y = (bounds[0][1] + bounds[1][1]) / 2,
+            scale = .6 / Math.max(dx / width, dy / height),
+            translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.translate(translate).scale(scale).event);
+
+
+
       
     };
 
