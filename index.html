@@ -289,42 +289,26 @@ $(".stuff li > a").click( function() {
             .attr("id", "prov-borders")
             .on("click", clicked);
 
-    });
-
-    var counter = 0;
-    var currentSchool,grade,currentDist;
-
-        var tooltip = d3.select(".map")
-            .append("div")
-            .style("position", "absolute")
-            .style("z-index", "10")
-            .style("visibility", "hidden")
-            .style("color", "#222")
-            .style("padding", "8px")
-            .style("background-color", "#fff")
-            .style("border-radius", "6px")
-            .style("font", "12 px sans-serif")
-            .text("tooltip");
-
-
 
         d3.json("pillows.json", function(error, pillows) {
             if (error) return console.error(error);
 
             allPills = topojson.feature(pillows, pillows.objects.pillows).features
-            
+            console.log(allPills)
             var newpills =[]
 
             allPills.forEach(function(d){
-                // console.log(d.properties.locID )
+                // console.log(d.properties.locID)
 
                 if ($.inArray(d.properties.locID , stations)>0){
-                    console.log(d)
+                    // console.log(d.properties.locID)
                     newpills.push(d)
+                }else{
+                    // console.log(d.properties.locID)
                 }
 
             })
-            console.log(newpills)
+            // console.log(newpills)
             g.append("g")
                 .attr("class", "bubble")
                 .selectAll("circle")
@@ -360,6 +344,29 @@ $(".stuff li > a").click( function() {
                     });
 
         })
+
+
+
+
+    });
+
+    var counter = 0;
+    var currentSchool,grade,currentDist;
+
+        var tooltip = d3.select(".map")
+            .append("div")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("visibility", "hidden")
+            .style("color", "#222")
+            .style("padding", "8px")
+            .style("background-color", "#fff")
+            .style("border-radius", "6px")
+            .style("font", "12 px sans-serif")
+            .text("tooltip");
+
+
+
 
 
 
