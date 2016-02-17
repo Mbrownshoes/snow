@@ -45,14 +45,14 @@
 
 
 # snow basins
-build/snowd.json: build/BCGW_78757263_1449272954802_9232/SSL_SSB_SP/SSL_SSB_SP_polygon.shp
+build/ecoprov.json: build/BCGW_78757263_1455656037142_9764/ERC_ECOPRO/ERC_ECOPRO_polygon.shp
 	ogr2ogr -f GeoJSON  -t_srs "+proj=latlong +datum=WGS84" \
-	build/snowd.json \
-	build/BCGW_78757263_1449272954802_9232/SSL_SSB_SP/SSL_SSB_SP_polygon.shp
+	build/ecoprov.json \
+	build/BCGW_78757263_1455656037142_9764/ERC_ECOPRO/ERC_ECOPRO_polygon.shp
 
 
 #working version, not bc albers		
-snowdist.json: build/snowd.json
+ecop.json: build/ecoprov.json
 	node_modules/.bin/topojson \
 		-o $@ \
 		--projection='width = 960, height = 600, d3.geo.albers() \
@@ -64,7 +64,20 @@ snowdist.json: build/snowd.json
 	    --properties='basin=BASIN_NAME' \
 	    --properties='basinID=BASIN_ID' \
 	    --simplify=0.05 \
-		-- snowdist=$<
+		-- ecop=$<
+
+
+pacific.json: build/ocean.json
+	node_modules/.bin/topojson \
+		-o $@ \
+		--projection='width = 960, height = 600, d3.geo.albers() \
+			.rotate([126, -10]) \
+		    .center([7,44]) \
+		    .parallels([50, 58]) \
+		    .scale(1970) \
+		    .translate([width / 2, height / 2])' \
+	    --simplify=0.05 \
+		-- pacific=$<
 
 # snow pillow locations
 build/snowp.json: build/BCGW_78757263_1449273107815_7232/SSL_SPL_SV/SSL_SPL_SV_point.shp

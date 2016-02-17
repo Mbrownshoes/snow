@@ -37,6 +37,11 @@
         cursor: pointer;
     }
     
+/*.ocean {
+        fill: steelblue;
+        cursor: pointer;
+    }*/
+
     #provinces .active {
         fill: orange;
         fill-opacity: 0.6;
@@ -118,7 +123,7 @@
 
     #chart_container {
         position: absolute;
-        left:920px;
+        left:620px;
         top:140px;
     }
 
@@ -146,7 +151,7 @@
 <body>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
-
+<script src="http://d3js.org/queue.v1.min.js"></script>
 <h1>BC Snow Explorer</h1>
 
 <!-- Single button -->
@@ -199,6 +204,10 @@ $(".stuff li > a").click( function() {
 //   this.parentNode.appendChild(this);
 //   });
 // };
+queue()
+    .defer(d3.json, "ecop.json")
+    .defer(d3.json, "pacific.json")
+    .await(ready);
 
     var width = 900,
         height = 700,
@@ -251,6 +260,19 @@ $(".stuff li > a").click( function() {
     d3.select("#grades").style("visibility","hidden")
     d3.select("#distid").style("visibility","hidden")
 
+
+
+
+  // d3.json("pacific.json", function(error, pacific) {
+  //       if (error) return console.error(error);
+  //           ocean = g.selectAll("path") // only using to mask tiles that spill over boarder. Could clip tiles instead...
+  //       .data(topojson.feature(pacific, pacific.objects.ocean).features)
+  //           .enter()
+  //           .append("path")
+  //           .attr("d", path)
+  //            .style("fill", "#a6cef5");
+  //   })
+  
     //load snow data to find only valid stations
     var data = {
         resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
@@ -275,25 +297,59 @@ $(".stuff li > a").click( function() {
 
     //
 
+    function ready(error,ecop,pacific){
+        "use strict";
+        if (error) { 
+            return console.error(error);
+        }
 
-    d3.json("snowdist.json", function(error, BC) {
-        if (error) return console.error(error);
 
-        g.append("g")
-            .attr("id", "provinces")
-            .selectAll("path")
-            .data(topojson.feature(BC, BC.objects.snowdist).features)
-            .enter()
-            .append("path")
-            .attr("d", path)
-            .attr("id", "prov-borders")
-            .on("click", clicked);
+
+
+var ocean
+
+    // d3.json("ecop.json", function(error, BC) {
+    //     if (error) return console.error(error);
+var bTopo = topojson.feature(ecop, ecop.objects.ecop),
+        topo = bTopo.features;
+
+    g.append("g")
+        .attr("id", "provinces")
+        .selectAll("path")
+        .data(bTopo.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .attr("id", "provinces")
+        .attr("id", "prov-borders")
+        .on("click", clicked);
+
+    var pacific = topojson.feature(pacific, pacific.objects.ocean);
+
+    
+
+    ocean = g.selectAll("path2") // only using to mask tiles that spill over boarder. Could clip tiles instead...
+        .data(pacific.features)
+        .enter().append("path")
+        .attr("class", "ocean");
+
+        ocean.attr("d", path)
+            .style("fill", "#a6cef5");
+        // g.append("g")
+            
+        //     .selectAll("path")
+        //     .data(topojson.feature(BC, BC.objects.ecop).features)
+        //     .enter()
+        //     .append("path")
+        //     .attr("d", path)
+        //     .attr("id", "prov-borders")
+        //     .on("click", clicked);
 
 
         d3.json("pillows.json", function(error, pillows) {
             if (error) return console.error(error);
 
-            allPills = topojson.feature(pillows, pillows.objects.pillows).features
+            var allPills = topojson.feature(pillows, pillows.objects.pillows).features
             console.log(allPills)
             var newpills =[]
 
@@ -347,8 +403,12 @@ $(".stuff li > a").click( function() {
 
 
 
+}
 
-    });
+    // });
+
+
+
 
     var counter = 0;
     var currentSchool,grade,currentDist;
@@ -364,9 +424,6 @@ $(".stuff li > a").click( function() {
             .style("border-radius", "6px")
             .style("font", "12 px sans-serif")
             .text("tooltip");
-
-
-
 
 
 
@@ -412,8 +469,6 @@ $(".stuff li > a").click( function() {
         svg.transition()
             .duration(750)
             .call(zoom.translate(translate).scale(scale).event);
-
-
 
       
     };
@@ -464,6 +519,7 @@ $(".stuff li > a").click( function() {
     // var outputFormat = d3.time.format("%Y-%m-%d %X"); 
     // outputFormat(inputFormat.parse(t+"-0800"))
     var chartData = [];
+    var alldat;
 
     var x = d3.time.scale()
         .range([0, widthG]);
@@ -502,27 +558,40 @@ $(".stuff li > a").click( function() {
         // console.log('stuff')
         "use strict";
 
-        var data = {
-            resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-            limit: 200, // get 2 days of data
-            offset: 2300
-            // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
-        };
+        // var data = {
+        //     resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
+        //     limit: 200, // get 2 days of data
+        //     offset: 2300
+        //     // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
+        // };
 
 
 
-        $.ajax({
-            url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
-            data: data,
-            success: function(data) {
+        // $.ajax({
+        //     url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
+        //     data: data,
+        //     success: function(data) {
 
-                var siteData = data.result.records;
-                console.log(siteData)
+        //         var siteData = data.result.records;
+        //         console.log(siteData)
 
-                plot_data(siteData);
+        //         plot_data(siteData);
 
-            }
-        })
+        //     }
+        // })
+
+        
+        d3.csv("daily_asp.csv", function(alldat){
+            // console.log('start')
+            alldat.forEach(function(d) {
+                d.id= d.Pillow_ID,
+                d.date= d.Date,
+                d.variable= d.variable,
+                d.value= +d.value,
+                d.code= d.code
+            })
+            console.log(alldat)
+            })
 
         function plot_data(data){
                 var chartData = []
