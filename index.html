@@ -33,7 +33,7 @@
     }
     
     #provinces {
-        fill: #ddd;
+        fill: #e7e7e7;
         cursor: pointer;
     }
     
@@ -189,15 +189,14 @@
 
 <script>
 
+$(".stuff li > a").click(function() {
 
-$(".stuff li > a").click( function() {
-    
     level = $(this).text().toUpperCase()
     console.log(level)
-    $(".btn:first-child").html($(this).text()+' <span class="caret"></span>');
+    $(".btn:first-child").html($(this).text() + ' <span class="caret"></span>');
     $(".btn:first-child").val($(this).text());
     // currentDist = []
-    updateSchoolLevel(currentDist,level);
+    updateSchoolLevel(currentDist, level);
 });
 // d3.selection.prototype.moveToFront = function() {
 //   return this.each(function(){
@@ -209,108 +208,97 @@ queue()
     .defer(d3.json, "pacific.json")
     .await(ready);
 
-    var width = 900,
-        height = 700,
-        active = d3.select(null);
+var width = 900,
+    height = 700,
+    active = d3.select(null);
 
-    var formatNumber = d3.format(",.0f");
-
-
-
-    var path = d3.geo.path()
-        .projection(null);
-
-
-    var zoom = d3.behavior.zoom()
-        .translate([0, 0])
-        .scale(1)
-        .scaleExtent([1, 8])
-        .on("zoom", zoomed);
-
-    var svg = d3.select(".map")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .on("click", stopped, true);
-
-    var radius = d3.scale.sqrt()
-        .domain([0, 1e6])
-        .range([0, 4]);
-
-    var tooltip = d3.select(".map")
-        .append("div")
-        .attr("class", "tooltip");
-
-
-    svg.append("rect")
-        .attr("class", "background")
-        .attr("width", width)
-        .attr("height", height)
-        .on("click", reset);
-
-    var g = svg.append("g")
-
-    var test
-    var stations = []
-
-    svg
-        .call(zoom)
-        .call(zoom.event)
-
-    d3.select("#grades").style("visibility","hidden")
-    d3.select("#distid").style("visibility","hidden")
+var formatNumber = d3.format(",.0f");
 
 
 
+var path = d3.geo.path()
+    .projection(null);
 
-  // d3.json("pacific.json", function(error, pacific) {
-  //       if (error) return console.error(error);
-  //           ocean = g.selectAll("path") // only using to mask tiles that spill over boarder. Could clip tiles instead...
-  //       .data(topojson.feature(pacific, pacific.objects.ocean).features)
-  //           .enter()
-  //           .append("path")
-  //           .attr("d", path)
-  //            .style("fill", "#a6cef5");
-  //   })
-  
-    //load snow data to find only valid stations
-    var data = {
-        resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-        limit: 1 // get 2 days of data
-    };
 
-    $.ajax({
-         async: false,
-        url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
-        data: data,
-        success: function(data) {
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
 
-            for (i = 0; i < data.result.fields.length; i++) {
-                        stations.push(
-                            data.result.fields[i]['id'].slice(0,5)
-                        )
-            }
+var svg = d3.select(".map")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", stopped, true);
+
+var radius = d3.scale.sqrt()
+    .domain([0, 1e6])
+    .range([0, 4]);
+
+var tooltip = d3.select(".map")
+    .append("div")
+    .attr("class", "tooltip");
+
+
+svg.append("rect")
+    .attr("class", "background")
+    .attr("width", width)
+    .attr("height", height)
+    .on("click", reset);
+
+var g = svg.append("g")
+
+var test
+var stations = []
+
+svg
+    .call(zoom)
+    .call(zoom.event)
+
+d3.select("#grades").style("visibility", "hidden")
+d3.select("#distid").style("visibility", "hidden")
+
+
+
+//load snow data to find only valid stations
+var data = {
+    resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
+    limit: 1 // get 2 days of data
+};
+
+$.ajax({
+    async: false,
+    url: 'http://api.gov.bc.ca/bcdc/3/action/datastore_search',
+    data: data,
+    success: function(data) {
+
+        for (i = 0; i < data.result.fields.length; i++) {
+            stations.push(
+                data.result.fields[i]['id'].slice(0, 5)
+            )
         }
-    })
+    }
+})
 
 // console.log(stations)
 
-    //
+//
 
-    function ready(error,ecop,pacific){
-        "use strict";
-        if (error) { 
-            return console.error(error);
-        }
-
-
+function ready(error, ecop, pacific) {
+    "use strict";
+    if (error) {
+        return console.error(error);
+    }
 
 
-var ocean
+
+
+    var ocean
 
     // d3.json("ecop.json", function(error, BC) {
     //     if (error) return console.error(error);
-var bTopo = topojson.feature(ecop, ecop.objects.ecop),
+    var bTopo = topojson.feature(ecop, ecop.objects.ecop),
         topo = bTopo.features;
 
     g.append("g")
@@ -326,484 +314,577 @@ var bTopo = topojson.feature(ecop, ecop.objects.ecop),
 
     var pacific = topojson.feature(pacific, pacific.objects.ocean);
 
-    
 
-    ocean = g.selectAll("path2") // only using to mask tiles that spill over boarder. Could clip tiles instead...
+
+    ocean = g.selectAll("path2")
         .data(pacific.features)
         .enter().append("path")
         .attr("class", "ocean");
 
-        ocean.attr("d", path)
-            .style("fill", "#a6cef5");
-        // g.append("g")
-            
-        //     .selectAll("path")
-        //     .data(topojson.feature(BC, BC.objects.ecop).features)
-        //     .enter()
-        //     .append("path")
-        //     .attr("d", path)
-        //     .attr("id", "prov-borders")
-        //     .on("click", clicked);
+    ocean.attr("d", path)
+        .style("fill", "white");
 
 
-        d3.json("pillows.json", function(error, pillows) {
-            if (error) return console.error(error);
+    d3.json("pillows.json", function(error, pillows) {
+        if (error) return console.error(error);
 
-            var allPills = topojson.feature(pillows, pillows.objects.pillows).features
-            console.log(allPills)
-            var newpills =[]
+        var allPills = topojson.feature(pillows, pillows.objects.pillows).features
+            // console.log(allPills)
+        var newpills = []
 
-            allPills.forEach(function(d){
+        allPills.forEach(function(d) {
                 // console.log(d.properties.locID)
 
-                if ($.inArray(d.properties.locID , stations)>0){
+                if ($.inArray(d.properties.locID, stations) > 0) {
                     // console.log(d.properties.locID)
                     newpills.push(d)
-                }else{
+                } else {
                     // console.log(d.properties.locID)
                 }
 
             })
             // console.log(newpills)
-            g.append("g")
-                .attr("class", "bubble")
-                .selectAll("circle")
-                .data(newpills)
-                .enter()
-                .append("circle")
-                .attr("transform", function(d) {
-                    return "translate(" + path.centroid(d) + ")";
-                })
-                .attr("r", 10)
+        g.append("g")
+            .attr("class", "bubble")
+            .selectAll("circle")
+            .data(newpills)
+            .enter()
+            .append("circle")
+            .attr("transform", function(d) {
+                return "translate(" + path.centroid(d) + ")";
+            })
+            .attr("r", 10)
 
-                .on("mouseover", function(d) {
-                        console.log(d.properties)
-                        tooltip.text(d.properties.staNam);
-                        tooltip.style("visibility", "visible");
-                    })
-                    .on("mousemove", function() {
-                        return tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX - 300) + "px");
-                    })
-                    .on("mouseout", function() {
-                        return tooltip.style("visibility", "hidden");
-                    })
-                    .on("click", function(d) {
-                        currentSchool = d;
-                        // if first time make if second update chart
-                        if (counter == 0){
-                            makeChart(d);
-                            counter += 1;
-                            console.log(counter)
-                        }else{
-                            updatechart(d,grade);
-                        }                        
-                    });
+        .on("mouseover", function(d) {
+                console.log(d.properties)
+                tooltip.text(d.properties.staNam);
+                tooltip.style("visibility", "visible");
+            })
+            .on("mousemove", function() {
+                return tooltip.style("top", (d3.event.pageY - 10) + "px").style("left", (d3.event.pageX - 300) + "px");
+            })
+            .on("mouseout", function() {
+                return tooltip.style("visibility", "hidden");
+            })
+            .on("click", function(d) {
+                currentStation = d;
+                // if first time make if second update chart
+                if (counter == 0) {
+                    makeChart(d);
+                    counter += 1;
+                    console.log(counter)
+                } else {
+                    updatechart(d);
+                }
+            });
 
-        })
+    })
 
+    // d3.csv("build/daily.csv", function(alldat) {
+    //     // console.log('start')
+    //     // alldat.forEach(function(d) {
+    //     //     // d.id = d.Pillow_ID,
+    //     //     //     d.date = d.Date,
+    //     //     //     d.variable = d.variable,
+    //     //         d.value = +d.value
+    //     //         // d.code = d.code
+    //     // })
+    //     console.log(alldat)
+    // })
+
+// var data = {
+//     resource_id: '4e613d93-fdf7-4350-a356-c8ef255da7d4', // 
+//     filters: '{"Pillow_ID":"_1A01P","variable":"SD"}',
+//     limit: 1000
+// };
+
+// $.ajax({
+//     async: false,
+//     url: 'https://cat.data.gov.bc.ca/api/action/datastore_search',
+//     data: data,
+//     success: function(data) {
+//         console.log(data)
+
+//         for (i = 0; i < data.result.fields.length; i++) {
+//             stations.push(
+//                 data.result.fields[i]['id'].slice(0, 5)
+//             )
+//         }
+//     }
+// })
 
 
 }
 
-    // });
+
+
+var counter = 0;
+var currentStation, grade, currentDist;
+
+var tooltip = d3.select(".map")
+    .append("div")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("color", "#222")
+    .style("padding", "8px")
+    .style("background-color", "#fff")
+    .style("border-radius", "6px")
+    .style("font", "12 px sans-serif")
+    .text("tooltip");
 
 
 
+function clicked(d) {
+    console.log(d)
 
-    var counter = 0;
-    var currentSchool,grade,currentDist;
-
-        var tooltip = d3.select(".map")
-            .append("div")
-            .style("position", "absolute")
-            .style("z-index", "10")
-            .style("visibility", "hidden")
-            .style("color", "#222")
-            .style("padding", "8px")
-            .style("background-color", "#fff")
-            .style("border-radius", "6px")
-            .style("font", "12 px sans-serif")
-            .text("tooltip");
-
-
-
-    function clicked(d) {
-        // console.log(d)
-
-        d3.select("#distid").style("visibility","visible")
+    d3.select("#distid").style("visibility", "visible")
         .transition()
-            .delay(200)
-            .text(d.properties.basin+ " Snow Basin");
-            // $("#distid").text(d.properties.basin );
+        .delay(200)
+        .text(d.properties.basin + " Snow Basin");
+    // $("#distid").text(d.properties.basin );
 
-         // var disttext = svg.append("text")
-         //            .transition()
-         //            .delay(200)
-         //            .attr("x", (width / 4))             
-         //            .attr("y", 0 - (margin.top / 2))
-         //            .attr("text-anchor", "middle")  
-         //            .style("font-size", "16px") 
-         //            .text(d.properties.basin);
+    // var disttext = svg.append("text")
+    //            .transition()
+    //            .delay(200)
+    //            .attr("x", (width / 4))             
+    //            .attr("y", 0 - (margin.top / 2))
+    //            .attr("text-anchor", "middle")  
+    //            .style("font-size", "16px") 
+    //            .text(d.properties.basin);
 
-        currentDist = d;
+    currentDist = d;
 
-        // g.selectAll([".bubble"]).remove();
+    // g.selectAll([".bubble"]).remove();
 
-        dist_num = d.properties.zoneNum;
-        dist_name = d.properties.zone;
+    dist_num = d.properties.zoneNum;
+    dist_name = d.properties.zone;
 
-        if (active.node() === this) return reset();
-        active.classed("active", false);
-        active = d3.select(this).classed("active", true);
-
-
-        var bounds = path.bounds(d),
-            dx = bounds[1][0] - bounds[0][0],
-            dy = bounds[1][1] - bounds[0][1],
-            x = (bounds[0][0] + bounds[1][0]) / 2,
-            y = (bounds[0][1] + bounds[1][1]) / 2,
-            scale = .6 / Math.max(dx / width, dy / height),
-            translate = [width / 2 - scale * x, height / 2 - scale * y];
+    if (active.node() === this) return reset();
+    active.classed("active", false);
+    active = d3.select(this).classed("active", true);
 
 
-        svg.transition()
-            .duration(750)
-            .call(zoom.translate(translate).scale(scale).event);
-
-      
-    };
-
-
-    function reset() {
-        active.classed("active", false);
-        active = d3.select(null);
-
-        svg.transition()
-            .duration(750)
-            .call(zoom.translate([0, 0]).scale(1).event);
-
-        d3.select("h3")
-            .transition()
-            .delay(750)
-            .style("visibility", "visible");
-    }
-
-    function zoomed() {
-        g.style("stroke-width", 1 / d3.event.scale + "px");
-        g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-
-        g.selectAll("circle")
-            .attr("r", 10 / d3.event.scale);
-    }
-
-    // If the drag behavior prevents the default click,
-    // also stop propagation so we don’t click-to-zoom.
-    function stopped() {
-        if (d3.event.defaultPrevented) d3.event.stopPropagation();
-    }
-
-    // Chart stuff
-
-    margin = {
-        top: 20,
-        right: 20,
-        bottom: 30,
-        left: 50
-    };
-
-    var widthG = 760 /2 - margin.left - margin.right,
-        heightG = 250 - margin.top - margin.bottom;
-
-    // var parseDate = d3.time.format("%y %m").parse;
-    var parseDate = d3.time.format.iso.parse; 
-    // var outputFormat = d3.time.format("%Y-%m-%d %X"); 
-    // outputFormat(inputFormat.parse(t+"-0800"))
-    var chartData = [];
-    var alldat;
-
-    var x = d3.time.scale()
-        .range([0, widthG]);
-
-    var y = d3.scale.linear()
-        .range([heightG, 0]);
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom")
-        .ticks(4);
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
-
-    var line = d3.svg.line()
-        .x(function(d) {
-            // console.log(d.date)
-            return x(d.date);
-        })
-        .y(function(d) {
-            // console.log(d.sd)
-            return y(d.sd);
-        });
-
-    var meanLine, AvgLine;
-    
-    svg = d3.select("#chart").append("svg")
-        .attr("width", widthG + 100 + margin.left + margin.right)
-        .attr("height", heightG + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    function makeChart(d) {
-        // console.log('stuff')
-        "use strict";
-
-        // var data = {
-        //     resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-        //     limit: 200, // get 2 days of data
-        //     offset: 2300
-        //     // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
-        // };
+    var bounds = path.bounds(d),
+        dx = bounds[1][0] - bounds[0][0],
+        dy = bounds[1][1] - bounds[0][1],
+        x = (bounds[0][0] + bounds[1][0]) / 2,
+        y = (bounds[0][1] + bounds[1][1]) / 2,
+        scale = .6 / Math.max(dx / width, dy / height),
+        translate = [width / 2 - scale * x, height / 2 - scale * y];
 
 
-
-        // $.ajax({
-        //     url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
-        //     data: data,
-        //     success: function(data) {
-
-        //         var siteData = data.result.records;
-        //         console.log(siteData)
-
-        //         plot_data(siteData);
-
-        //     }
-        // })
-
-        
-        d3.csv("daily_asp.csv", function(alldat){
-            // console.log('start')
-            alldat.forEach(function(d) {
-                d.id= d.Pillow_ID,
-                d.date= d.Date,
-                d.variable= d.variable,
-                d.value= +d.value,
-                d.code= d.code
-            })
-            console.log(alldat)
-            })
-
-        function plot_data(data){
-                var chartData = []
-                for (i = 0; i < data.length; i++) {
-                    test = data
-                    // console.log(i)
-                    var k
-                    for (k in data[i]){
-                        if (k.slice(0,5) == d.properties.locID){
-                            chartData.push({
-                                date:parseDate(data[i]['DATE (UTC)']),
-                                sd:data[i][k]
-                            })
-                        }
-
-                    }
-                }
-
-                chartData.sort(function(a, b) {
-                    return a.date - b.date;
-                });
-
-                var dataSum = d3.sum(chartData, function (d) {
-                    // console.log(d.sd)
-                    return d.sd;
-                });
-             
-
-                meanLine = d3.svg.line()
-                    .x(function(d) {
-                        return x(d.date);
-                    })
-                    .y(function(d) {
-                        return y(dataSum/chartData.length);
-                    });
-
-                y.domain([0,300]);
-
-                x.domain(d3.extent(chartData, function(d) {
-                    return d.date;
-                }));
+    svg.transition()
+        .duration(750)
+        .call(zoom.translate(translate).scale(scale).event);
 
 
-
-                svg.append("g") //x axis group
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + heightG + ")")
-                    .call(xAxis);
-
-                svg.append("g")
-                    .attr("class", "y axis")
-                    .call(yAxis)
-                    .append("text")
-                    .attr("transform", "rotate(-90)")
-                    .attr("y", -48)
-                    .attr("dy", ".71em")
-                    .style("text-anchor", "end")
-                    .text("Snow depth (cm)");
-
-                svg.append("path")
-                    .attr("class", "line")
-                    .attr("d", line(chartData));
-
-                AvgLine = svg.append("g");
-
-                AvgLine.append("path")
-                    .attr("class", "line1")
-                    .attr("d", meanLine(chartData));
-
-                // svg.selectAll("circle")
-                //     .data(chartData)
-                //     .enter()
-                //     .append("circle")
-                //     .attr("r", 3.5)
-                //     .attr("cx", function (d) {
-                //         return x(d.date);
-                //     })
-                //     .attr("cy", function (d) {
-                //         return y(d.sd);
-                //     })
-                //     .style("fill", "rgb(214,39,40)");
+};
 
 
+function reset() {
+    active.classed("active", false);
+    active = d3.select(null);
 
+    svg.transition()
+        .duration(750)
+        .call(zoom.translate([0, 0]).scale(1).event);
 
-        }
+    d3.select("h3")
+        .transition()
+        .delay(750)
+        .style("visibility", "visible");
+}
 
-        // d3.select("#grades").transition()
-        //     .delay(200).style("visibility","visible")
+function zoomed() {
+    g.style("stroke-width", 1 / d3.event.scale + "px");
+    g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 
-        var stationtext = svg.append("text")
-            .transition()
-            .delay(200)
-            .attr("x", (width / 4))             
-            .attr("y", 0 - (margin.top / 2.5))
-            .attr("text-anchor", "middle")  
-            .style("font-size", "16px") 
-            .text(d.properties.staNam);
+    g.selectAll("circle")
+        .attr("r", 10 / d3.event.scale);
+}
 
-    }
+// If the drag behavior prevents the default click,
+// also stop propagation so we don’t click-to-zoom.
+function stopped() {
+    if (d3.event.defaultPrevented) d3.event.stopPropagation();
+}
 
+// Chart stuff
 
-    $('.btn-info').bind("click", function(event) {
-        // $('#oneThree').removeClass("active")
-        // $(this).prev().removeClass("active")
-        event.preventDefault();
-        $(this).addClass('active').siblings().removeClass('active');
-        grade = $(this).attr("value")
-        // $(this).css("background","red");
-        console.log($(this).prev())
-        updatechart(currentSchool,grade)
+margin = {
+    top: 20,
+    right: 20,
+    bottom: 30,
+    left: 50
+};
+
+var widthG = 760 / 2 - margin.left - margin.right,
+    heightG = 250 - margin.top - margin.bottom;
+
+// var parseDate = d3.time.format("%y %m").parse;
+var parseDate = d3.time.format.iso.parse;
+// var outputFormat = d3.time.format("%Y-%m-%d %X"); 
+// outputFormat(inputFormat.parse(t+"-0800"))
+var chartData = [];
+var alldat;
+
+var x = d3.time.scale()
+    .range([0, widthG]);
+
+var y = d3.scale.linear()
+    .range([heightG, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .ticks(4);
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+var line = d3.svg.line()
+    .x(function(d) {
+        // console.log(d.date)
+        return x(d.date);
     })
+    .y(function(d) {
+        // console.log(d)
+        return y(d.val);
+    });
 
-    function updatechart(d){
-       
-        "use strict";
-        var data = {
-            resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
-            limit: 200, // get 2 days of data
-            offset: 2300
-        };
+var meanLine, AvgLine;
+
+svg = d3.select("#chart").append("svg")
+    .attr("width", widthG + 100 + margin.left + margin.right)
+    .attr("height", heightG + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+function makeChart(d) {
+    console.log(d)
+    "use strict";
+
+    var data = {
+        resource_id: '945c144a-d094-4a20-a3c6-9fe74cad368a', // 
+        filters: '{"Pillow_ID":"_' + d.properties.locID + '","variable":"SD"}',
+        limit: 1000
+    };
+    
 
 
-        $.ajax({
-            url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
-            data: data,
-            success: function(data) {
-                // console.log(data)
+    "use strict";
+
+
+    $.ajax({
+        async: false,
+        url: 'http://api.gov.bc.ca/bcdc/3/action/datastore_search',
+        data: data,
+        success: function(data) {
+            // console.log(data)
                 var chartData = []
 
                 for (i = 0; i < data.result.records.length; i++) {
                     // if key = site ID
-                    var k
-                    for (k in data.result.records[i]){
-                        if (k.slice(0,5) == d.properties.locID){
+                    // var k
+                    // for (k in data.result.records[i].Pillow_ID) {
+                        // console.log(k)
+                        // if (k.slice(0, 5) == d.properties.locID) {
+                        if(data.result.records[i]['value'] != null){
                             chartData.push({
-                                date:parseDate(data.result.records[i]['DATE (UTC)']),
-                                sd:data.result.records[i][k]
+                                date: parseDate(data.result.records[i]['Date']),
+                                vari: data.result.records[i]['variable'],
+                                val: data.result.records[i]['value']
                             })
                         }
+                        // }
 
-                    }
+                    // }
 
                 }
-                chartData.sort(function(a, b) {
-                    return a.date - b.date;
-                });
+                plot_data(chartData);
 
-                console.log(chartData)
+            }
+        })
+    // var data = {
+    //     resource_id: 'abba1811-dd9a-4447-a297-2b5f81410abd', // 
+    //     limit: 200, // get 2 days of data
+    //     offset: 2300
+    //     // filters: '{"DATE (UTC)":' + '"' + '1A01P Yellowhead Lake Snow Pillow' + '"' + '}' //filter by date
+    // };
 
-                x.domain(d3.extent(chartData, function(d) {
-                    console.log(d.date)
-                    return d.date;
-                }));
 
-                var dataSum = d3.sum(chartData, function (d) {
-                    // console.log(d.sd)
-                    return d.sd;
-                });
 
-                meanLine = d3.svg.line()
-                    .x(function(d) {
-                        return x(d.date);
-                    })
-                    .y(function(d) {
-                        return y(dataSum/chartData.length);
-                    });
+    // $.ajax({
+    //     url: 'https://uat-api.bcdevexchange.org/bcdc/action/datastore_search',
+    //     data: data,
+    //     success: function(data) {
 
-                //transitions
-                svg.select(".line")
-                    .transition()
-                    .duration(1000)
-                    .attr("d", line(chartData));
+    //         var siteData = data.result.records;
+    //         console.log(siteData)
 
-                AvgLine.selectAll("path")
-                    .transition()
-                    .duration(1000)
-                    .attr("d", meanLine(chartData));
+    //         plot_data(siteData);
 
-                // svg.selectAll("circle")
-                //     .data(chartData)
-                //     .transition()
-                //     .duration(1000)
-                //     .attr("r", 3.5)
-                //     .attr("cx", function (d) {
-                //         // console.log(d)
-                //         return x(d.date);
-                //     })
-                //     .attr("cy", function (d) {
-                //         return y(d.sd);
-                //     })
-                //     .style("fill", "rgb(214,39,40)");
-          
+    //     }
+    // })
 
-         // Update X axis
-            // svg.select(".y.axis")
-            //     .transition()
-            //     .duration(1000)
-            //     .call(yAxis);
-            d3.select("text")
-            .transition()
-            .duration(1000)
-            .attr("x", (width / 4))             
-            .attr("y", 0 - (margin.top / 2.5))
-            .attr("text-anchor", "middle")  
-            .style("font-size", "16px") 
-            .text(d.properties.staNam);
-        }
-      
-    })
+
+
+
+    function plot_data(chartData) {
+        // var chartData = []
+        // for (i = 0; i < data.length; i++) {
+        //     test = data
+        //         // console.log(i)
+        //     var k
+        //     for (k in data[i]) {
+        //         if (k.slice(0, 5) == d.properties.locID) {
+        //             chartData.push({
+        //                 date: parseDate(data[i]['DATE (UTC)']),
+        //                 sd: data[i][k]
+        //             })
+        //         }
+
+        //     }
+        // }
+
+        chartData.sort(function(a, b) {
+            return a.date - b.date;
+        });
+
+        var dataSum = d3.sum(chartData, function(d) {
+            // console.log(d)
+            // if(d.vari=="SD"){
+                // console.log(d)
+                return Number(d.val);
+            // }
+            
+        });
+
+
+        meanLine = d3.svg.line()
+            .x(function(d) {
+                return x(d.date);
+            })
+            .y(function(d) {
+                return y(dataSum / chartData.length);
+            });
+
+        console.log(d3.extent(chartData, function(d) {
+
+            return Number(d.val);
+        }))
+        y.domain(d3.extent(chartData, function(d) {
+
+            return Number(d.val);
+        }));
+
+        x.domain(d3.extent(chartData, function(d) {
+            return d.date;
+        }));
+
+
+
+        svg.append("g") //x axis group
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + heightG + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -48)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Snow depth (cm)");
+
+        svg.append("path")
+            .attr("class", "line")
+            .attr("d", line(chartData));
+
+        AvgLine = svg.append("g");
+
+        AvgLine.append("path")
+            .attr("class", "line1")
+            .attr("d", meanLine(chartData));
+
+        // svg.selectAll("circle")
+        //     .data(chartData)
+        //     .enter()
+        //     .append("circle")
+        //     .attr("r", 3.5)
+        //     .attr("cx", function (d) {
+        //         return x(d.date);
+        //     })
+        //     .attr("cy", function (d) {
+        //         return y(d.sd);
+        //     })
+        //     .style("fill", "rgb(214,39,40)");
+
+
+
 
     }
+
+    // d3.select("#grades").transition()
+    //     .delay(200).style("visibility","visible")
+
+    var stationtext = svg.append("text")
+        .transition()
+        .delay(200)
+        .attr("x", (width / 4))
+        .attr("y", 0 - (margin.top / 2.5))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .text(d.properties.staNam);
+
+}
+
+
+$('.btn-info').bind("click", function(event) {
+    // $('#oneThree').removeClass("active")
+    // $(this).prev().removeClass("active")
+    event.preventDefault();
+    $(this).addClass('active').siblings().removeClass('active');
+    grade = $(this).attr("value")
+        // $(this).css("background","red");
+    console.log($(this).prev())
+    updatechart(currentStation)
+})
+
+function updatechart(d) {
+    console.log(d)
+
+     var data = {
+        resource_id: '945c144a-d094-4a20-a3c6-9fe74cad368a', // 
+        filters: '{"Pillow_ID":"_' + d.properties.locID + '","variable":"SD"}',
+        limit: 5000
+    };
+
+
+    // "use strict";
+    // var data = {
+    //     resource_id: '4e613d93-fdf7-4350-a356-c8ef255da7d4', // 
+    //     filters: '{"Pillow_ID":_"'+d.properties+'"}'
+    // };
+// $.ajax({
+//     async: false,
+//     url: 'https://cat.data.gov.bc.ca/api/action/datastore_search',
+//     data: data,
+//     success: function(data) {
+//         console.log(data)
+
+//         for (i = 0; i < data.result.fields.length; i++) {
+//             stations.push(
+//                 data.result.fields[i]['id'].slice(0, 5)
+//             )
+//         }
+//     }
+// })
+
+    $.ajax({
+        async: false,
+        url: 'http://api.gov.bc.ca/bcdc/3/action/datastore_search',
+        data: data,
+        success: function(data) {
+            // console.log(data)
+                var chartData = []
+
+                for (i = 0; i < data.result.records.length; i++) {
+                    // if key = site ID
+                    // var k
+                    // for (k in data.result.records[i].Pillow_ID) {
+                        // console.log(k)
+                        // if (k.slice(0, 5) == d.properties.locID) {
+                        if(data.result.records[i]['value'] != null){
+                            chartData.push({
+                                date: parseDate(data.result.records[i]['Date']),
+                                vari: data.result.records[i]['variable'],
+                                val: data.result.records[i]['value']
+                        })
+                    }
+
+                // }
+
+            }
+            chartData.sort(function(a, b) {
+                return a.date - b.date;
+            });
+
+            console.log(chartData)
+
+            x.domain(d3.extent(chartData, function(d) {
+                // console.log(d.date)
+                return d.date;
+            }));
+
+            y.domain(d3.extent(chartData, function(d) {
+
+                return Number(d.val);
+            }));
+            
+            var dataSum = d3.sum(chartData, function(d) {
+                // console.log(d.sd)
+                return d.val;
+            });
+
+            meanLine = d3.svg.line()
+                .x(function(d) {
+                    return x(d.date);
+                })
+                .y(function(d) {
+                    return y(dataSum / chartData.length);
+                });
+
+            //transitions
+            svg.select(".line")
+                .transition()
+                .duration(1000)
+                .attr("d", line(chartData));
+
+            AvgLine.selectAll("path")
+                .transition()
+                .duration(1000)
+                .attr("d", meanLine(chartData));
+
+            // svg.selectAll("circle")
+            //     .data(chartData)
+            //     .transition()
+            //     .duration(1000)
+            //     .attr("r", 3.5)
+            //     .attr("cx", function (d) {
+            //         // console.log(d)
+            //         return x(d.date);
+            //     })
+            //     .attr("cy", function (d) {
+            //         return y(d.sd);
+            //     })
+            //     .style("fill", "rgb(214,39,40)");
+
+
+            // Update X axis
+            svg.select(".y.axis")
+                .transition()
+                .duration(1000)
+                .call(yAxis);
+
+
+            d3.select("text")
+                .transition()
+                .duration(1000)
+                .attr("x", (width / 4))
+                .attr("y", 0 - (margin.top / 2.5))
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text(d.properties.staNam);
+        }
+
+    })
+
+}
 
 </script>
 
